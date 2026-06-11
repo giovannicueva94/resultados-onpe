@@ -1,26 +1,25 @@
 import fetch from "node-fetch";
-import * as cheerio from "cheerio"; // librería para parsear HTML
+import * as cheerio from "cheerio";
 
 export default async function handler(req, res) {
   try {
     const response = await fetch("https://resultadosegundavuelta.onpe.gob.pe/main/resumen");
     const html = await response.text();
-
-    // Usamos cheerio para leer el HTML
     const $ = cheerio.load(html);
 
-    // Aquí debes inspeccionar el HTML de ONPE y extraer los datos correctos
-    // Ejemplo: supongamos que los votos están en un span con clase .votos
+    // Seleccionamos los bloques de candidatos
+    const bloques = $("div.card-candidato"); // ajusta según la clase real
+
     const candidato1 = {
-      nombre: "Keiko Fujimori",
-      votos: parseInt($("#candidato1 .votos").text().replace(/\D/g, "")),
-      porcentaje: $("#candidato1 .porcentaje").text()
+      nombre: bloques.eq(0).find("h2").text().trim(),
+      votos: parseInt(bloques.eq(0).find("div:contains('votos')").text().replace(/\D/g, "")),
+      porcentaje: bloques.eq(0).find("div:contains('%')").text().trim()
     };
 
     const candidato2 = {
-      nombre: "Roberto Sánchez",
-      votos: parseInt($("#candidato2 .votos").text().replace(/\D/g, "")),
-      porcentaje: $("#candidato2 .porcentaje").text()
+      nombre: bloques.eq(1).find("h2").text().trim(),
+      votos: parseInt(bloques.eq(1).find("div:contains('votos')").text().replace(/\D/g, "")),
+      porcentaje: bloques.eq(1).find("div:contains('%')").text().trim()
     };
 
     res.setHeader("Access-Control-Allow-Origin", "*");
