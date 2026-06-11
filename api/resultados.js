@@ -2,13 +2,17 @@ import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 
 export default async function handler(req, res) {
+  // habilitar CORS siempre
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   try {
     const response = await fetch("https://resultadosegundavuelta.onpe.gob.pe/main/resumen");
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Seleccionamos los bloques de candidatos
-    const bloques = $("article"); // cada candidato está dentro de un <article>
+    const bloques = $("article");
 
     const candidato1 = {
       nombre: bloques.eq(0).find(".tarjeta-candidato_info h2").text().trim(),
@@ -22,7 +26,6 @@ export default async function handler(req, res) {
       porcentaje: bloques.eq(1).find(".tarjeta-candidato_porcentaje").text().trim()
     };
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
     res.json({ candidatos: [candidato1, candidato2] });
   } catch (error) {
     res.status(500).send("Error obteniendo datos de ONPE");
