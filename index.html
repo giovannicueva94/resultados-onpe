@@ -6,86 +6,102 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      color: #333;
       text-align: center;
-      padding: 20px;
+      margin: 40px;
     }
     h1 {
-      color: #222;
+      font-size: 24px;
+      margin-bottom: 20px;
     }
     .candidato {
-      display: inline-block;
-      width: 45%;
-      margin: 10px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .nombre {
-      font-size: 1.2em;
-      font-weight: bold;
+      margin: 20px 0;
     }
     .barra {
-      height: 20px;
-      border-radius: 10px;
-      background: #ddd;
-      margin: 10px 0;
+      height: 25px;
+      background-color: #ddd;
+      border-radius: 5px;
       overflow: hidden;
+      margin-top: 5px;
     }
     .relleno {
       height: 100%;
       text-align: right;
-      padding-right: 5px;
-      color: #fff;
-      font-size: 0.9em;
+      padding-right: 10px;
+      color: white;
+      font-weight: bold;
+    }
+    .azul { background-color: #007bff; }
+    .verde { background-color: #28a745; }
+    #error {
+      color: red;
+      margin-top: 20px;
+      font-weight: bold;
     }
     #diferencia {
       margin-top: 20px;
-      font-size: 1.5em;
       font-weight: bold;
-      color: #d9534f;
+      color: darkred;
     }
   </style>
 </head>
 <body>
   <h1>Resultados Segunda Vuelta</h1>
+
   <div id="candidato1" class="candidato"></div>
+  <div id="barra1" class="barra"><div id="relleno1" class="relleno azul"></div></div>
+
   <div id="candidato2" class="candidato"></div>
+  <div id="barra2" class="barra"><div id="relleno2" class="relleno verde"></div></div>
+
   <div id="diferencia"></div>
+  <div id="error"></div>
 
   <script>
     async function cargarResultados() {
       try {
-        // Aquí deberías usar el endpoint real de ONPE
         const response = await fetch("https://resultados-onpe.vercel.app/api/resultados");
         const data = await response.json();
-        
+
+        if (!data.candidatos || data.candidatos.length < 2) {
+          document.getElementById("error").innerText = "Esperando actualización oficial de ONPE...";
+          return;
+        }
+
         const c1 = data.candidatos[0];
         const c2 = data.candidatos[1];
 
-        document.getElementById("candidato1").innerHTML = `
-          <div class="nombre">${c1.nombre}</div>
-          <div>${c1.votos.toLocaleString()} votos (${c1.porcentaje}%)</div>
-          <div class="barra"><div class="relleno" style="width:${c1.porcentaje}%;background:#007bff">${c1.porcentaje}%</div></div>
-        `;
-        document.getElementById("candidato2").innerHTML = `
-          <div class="nombre">${c2.nombre}</div>
-          <div>${c2.votos.toLocaleString()} votos (${c2.porcentaje}%)</div>
-          <div class="barra"><div class="relleno" style="width:${c2.porcentaje}%;background:#28a745">${c2.porcentaje}%</div></div>
-        `;
+        // Si los votos son 0, mostrar mensaje de espera
+        if (c1.votos === 0 && c2.votos === 0) {
+          document.getElementById("error").innerText = "Esperando actualización oficial de ONPE...";
+          return;
+        } else {
+          document.getElementById("error").innerText = "";
+        }
 
+        // Mostrar candidatos
+        document.getElementById("candidato1").innerText =
+          `${c1.nombre} - ${c1.votos.toLocaleString()} votos (${c1.porcentaje})`;
+        document.getElementById("candidato2").innerText =
+          `${c2.nombre} - ${c2.votos.toLocaleString()} votos (${c2.porcentaje})`;
+
+        // Barras de porcentaje
+        document.getElementById("relleno1").style.width = c1.porcentaje;
+        document.getElementById("relleno1").innerText = c1.porcentaje;
+        document.getElementById("relleno2").style.width = c2.porcentaje;
+        document.getElementById("relleno2").innerText = c2.porcentaje;
+
+        // Diferencia de votos
         const diferencia = Math.abs(c1.votos - c2.votos);
-        document.getElementById("diferencia").innerText = 
-          "Diferencia de votos: " + diferencia.toLocaleString();
+        document.getElementById("diferencia").innerText =
+          `Diferencia de votos: ${diferencia.toLocaleString()}`;
       } catch (error) {
-        document.getElementById("diferencia").innerText = "Error cargando resultados.";
+        document.getElementById("error").innerText = "Error cargando resultados";
       }
     }
 
-    setInterval(cargarResultados, 30000); // cada 30 segundos
+    // Cargar al inicio y refrescar cada 30 segundos
     cargarResultados();
+    setInterval(cargarResultados, 30000);
   </script>
 </body>
 </html>
