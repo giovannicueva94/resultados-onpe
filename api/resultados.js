@@ -34,8 +34,8 @@ export default async function handler(req, res) {
       porcentaje: bloques.eq(1).find(".tarjeta-candidato_porcentaje").text().trim()
     };
 
-    res.json({ candidatos: [candidato1, candidato2] });
+    res.status(200).json({ candidatos: [candidato1, candidato2] });
   } catch (error) {
-    res.status(500).send("Error obteniendo datos de ONPE");
+    res.status(500).json({ error: "Error obteniendo datos de ONPE" });
   }
 }
