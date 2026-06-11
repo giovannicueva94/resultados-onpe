@@ -1,3 +1,6 @@
+import fetch from "node-fetch";
+import * as cheerio from "cheerio";
+
 export default async function handler(req, res) {
   // Manejo de preflight (OPTIONS)
   if (req.method === "OPTIONS") {
@@ -12,9 +15,32 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // JSON fijo de prueba
-  const candidato1 = { nombre: "Candidato A", votos: 9034071, porcentaje: "50.002" };
-  const candidato2 = { nombre: "Candidato B", votos: 9033312, porcentaje: "49.998" };
+  try {
+    const response = await fetch("https://resultadosegundavuelta.onpe.gob.pe/main/resumen");
+    const html = await response.text();
+    const $ = cheerio.load(html);
 
-  res.status(200).json({ candidatos: [candidato1, candidato2] });
+    // Cada candidato está dentro de un <article>
+    const bloques = $("article");
+
+    const candidato1 = {
+      nombre: bloques.eq(0).find(".tarjeta-candidato_info h2").text().trim(),
+      votos: parseInt(
+        bloques.eq(0).find(".tarjeta-candidato_votos").text().replace(/\D/g, "")
+      ),
+      porcentaje: bloques.eq(0).find(".tarjeta-candidato_porcentaje").text().trim()
+    };
+
+    const candidato2 = {
+      nombre: bloques.eq(1).find(".tarjeta-candidato_info h2").text().trim(),
+      votos: parseInt(
+        bloques.eq(1).find(".tarjeta-candidato_votos").text().replace(/\D/g, "")
+      ),
+      porcentaje: bloques.eq(1).find(".tarjeta-candidato_porcentaje").text().trim()
+    };
+
+    res.status(200).json({ candidatos: [candidato1, candidato2] });
+  } catch (error) {
+    res.status(500).json({ error: "Error obteniendo datos de ONPE" });
+  }
 }
