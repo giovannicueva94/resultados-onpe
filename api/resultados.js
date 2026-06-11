@@ -8,18 +8,18 @@ export default async function handler(req, res) {
     const $ = cheerio.load(html);
 
     // Seleccionamos los bloques de candidatos
-    const bloques = $("div.card-candidato"); // ajusta según la clase real
+    const bloques = $("article"); // cada candidato está dentro de un <article>
 
     const candidato1 = {
-      nombre: bloques.eq(0).find("h2").text().trim(),
-      votos: parseInt(bloques.eq(0).find("div:contains('votos')").text().replace(/\D/g, "")),
-      porcentaje: bloques.eq(0).find("div:contains('%')").text().trim()
+      nombre: bloques.eq(0).find(".tarjeta-candidato_info h2").text().trim(),
+      votos: parseInt(bloques.eq(0).find(".tarjeta-candidato_votos").text().replace(/\D/g, "")),
+      porcentaje: bloques.eq(0).find(".tarjeta-candidato_porcentaje").text().trim()
     };
 
     const candidato2 = {
-      nombre: bloques.eq(1).find("h2").text().trim(),
-      votos: parseInt(bloques.eq(1).find("div:contains('votos')").text().replace(/\D/g, "")),
-      porcentaje: bloques.eq(1).find("div:contains('%')").text().trim()
+      nombre: bloques.eq(1).find(".tarjeta-candidato_info h2").text().trim(),
+      votos: parseInt(bloques.eq(1).find(".tarjeta-candidato_votos").text().replace(/\D/g, "")),
+      porcentaje: bloques.eq(1).find(".tarjeta-candidato_porcentaje").text().trim()
     };
 
     res.setHeader("Access-Control-Allow-Origin", "*");
