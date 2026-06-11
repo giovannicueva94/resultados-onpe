@@ -59,7 +59,7 @@
     async function cargarResultados() {
       try {
         // Aquí deberías usar el endpoint real de ONPE
-        const response = await fetch("https://resultadosegundavuelta.onpe.gob.pe/main/resumen");
+        const response = await fetch("https://resultados-onpe.vercel.app/api/resultados");
         const data = await response.json();
 
         const c1 = data.candidatos[0];
