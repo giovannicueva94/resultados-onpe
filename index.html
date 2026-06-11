@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados Segunda Vuelta</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #222;
+    }
+    .candidato {
+      display: inline-block;
+      width: 45%;
+      margin: 10px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .nombre {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .barra {
+      height: 20px;
+      border-radius: 10px;
+      background: #ddd;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .relleno {
+      height: 100%;
+      text-align: right;
+      padding-right: 5px;
+      color: #fff;
+      font-size: 0.9em;
+    }
+    #diferencia {
+      margin-top: 20px;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #d9534f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Resultados Segunda Vuelta</h1>
+  <div id="candidato1" class="candidato"></div>
+  <div id="candidato2" class="candidato"></div>
+  <div id="diferencia"></div>
+
+  <script>
+    async function cargarResultados() {
+      try {
+        // Aquí deberías usar el endpoint real de ONPE
+        const response = await fetch("https://resultadosegundavuelta.onpe.gob.pe/main/resumen");
+        const data = await response.json();
+
+        const c1 = data.candidatos[0];
+        const c2 = data.candidatos[1];
+
+        document.getElementById("candidato1").innerHTML = `
+          <div class="nombre">${c1.nombre}</div>
+          <div>${c1.votos.toLocaleString()} votos (${c1.porcentaje}%)</div>
+          <div class="barra"><div class="relleno" style="width:${c1.porcentaje}%;background:#007bff">${c1.porcentaje}%</div></div>
+        `;
+        document.getElementById("candidato2").innerHTML = `
+          <div class="nombre">${c2.nombre}</div>
+          <div>${c2.votos.toLocaleString()} votos (${c2.porcentaje}%)</div>
+          <div class="barra"><div class="relleno" style="width:${c2.porcentaje}%;background:#28a745">${c2.porcentaje}%</div></div>
+        `;
+
+        const diferencia = Math.abs(c1.votos - c2.votos);
+        document.getElementById("diferencia").innerText = 
+          "Diferencia de votos: " + diferencia.toLocaleString();
+      } catch (error) {
+        document.getElementById("diferencia").innerText = "Error cargando resultados.";
+      }
+    }
+
+    setInterval(cargarResultados, 30000); // cada 30 segundos
+    cargarResultados();
+  </script>
+</body>
+</html>
